@@ -48,7 +48,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		fmt.Printf("%s\n", data)
-		io.WriteString(w, "successful post")
+		io.WriteString(w, "successful post") //In development
 	} else {
 		w.WriteHeader(405)
 	}
