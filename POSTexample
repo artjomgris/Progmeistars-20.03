@@ -1,0 +1,40 @@
+//////////////////////////////HTML FORM
+<form enctype="multipart/form-data" action="/postCreation" method="POST">
+                    <div class="form-group">
+                        <label for="Name" class="text-body">Название поста:</label>
+                        <input type="text" name="Name" id="Name" class="form-control" id="formGroupExampleInput" placeholder="Название...">
+                        <br>
+                        <label for="exampleFormControlTextarea1" class="text-body">Текст публикации:</label>
+                        <textarea class="form-control" name="Text" id="Text"  id="exampleFormControlTextarea1" rows="3"></textarea><br>
+                        <label for="tagsInput" class="text-body">Теги, разделённые знаком ; без пробелов <br> Пробелы можно использовать в названии тега:</label>
+                        <input type="text" name="Tags" id="Tags" class="form-control" id="tagsInput" placeholder="tag 1;tag 2;tag 3;tag 4;tag...."><br>
+                        <input type="file" name="myFile" id="myFile" accept="image/*" multiple>
+                    </div>
+                 <button type="submit" class="btn btn-outline-primary">Создать</button>
+</form>
+
+///////////////////////////////Обработка формы на GO
+
+session, err := store.Get(r, "session")//Это cookies, до default идет их проверка на login
+	if err != nil {
+		fmt.Println(err)
+	}
+	if val, ok := session.Values["mail"].(string); ok {
+		switch val {
+		case "":
+			http.Redirect(w, r, "/login", http.StatusFound)
+		default:
+			r.ParseMultipartForm(10.0) // а тут уже сама форма
+			name := r.FormValue("Name")
+			if name != "" {
+				Savepost(r)
+			}
+			t, err := template.ParseFiles("templates/index.html", "templates/posts.html", "templates/header.html", "templates/footer.html")
+			if err != nil {
+				fmt.Println("HANDLE ERROR:", err.Error())
+			}
+			t.ExecuteTemplate(w, "index", nil)
+		}
+	} else {
+		http.Redirect(w, r, "/login", http.StatusFound)
+	}
