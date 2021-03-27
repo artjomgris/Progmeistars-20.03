@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type Data struct {
@@ -16,12 +17,9 @@ type Data struct {
 }
 
 func main() {
-	fmt.Println(getData())
-	person := Data{
-		Id:  2,
-		Age: 32,
+	for i := 1; i <= 11; i++ {
+		fmt.Println(removeData(i))
 	}
-	fmt.Println(changeData(person))
 
 }
 
@@ -55,6 +53,44 @@ func changeData(data Data) string {
 		panic(err)
 	}
 
+	rec, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	return string(rec)
+}
+
+func createData(data Data) string {
+	client := &http.Client{}
+
+	var body bytes.Buffer
+
+	out, err := json.Marshal(data)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body.Write(out)
+	req, err := http.NewRequest("PUT", "http://127.0.0.1:5000", &body)
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	rec, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	return string(rec)
+}
+
+func removeData(id int) string {
+	client := &http.Client{}
+
+	var body bytes.Buffer
+
+	body.Write([]byte(strconv.Itoa(id)))
+	req, err := http.NewRequest("DELETE", "http://127.0.0.1:5000", &body)
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
 	rec, err := io.ReadAll(resp.Body)
 	resp.Body.Close()
 	return string(rec)

@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 var db *sql.DB
@@ -46,7 +47,6 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			panic(err.Error())
 		}
-		fmt.Printf("%s\n", data)
 
 		var upd Data
 		err = json.Unmarshal(data, &upd)
@@ -82,13 +82,83 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			}
 
 			qwery += fmt.Sprintf(" WHERE `id` = %v;", upd.Id)
-			fmt.Println(qwery)
 
 			update, err := db.Query(qwery)
 			if err != nil {
 				panic(err.Error())
 			}
 			defer update.Close()
+			w.Write([]byte("Updated successfully!"))
+		}
+
+	} else if req.Method == "PUT" {
+
+		data, err := io.ReadAll(req.Body)
+		req.Body.Close()
+		if err != nil {
+			panic(err.Error())
+		}
+
+		var ins Data
+		err = json.Unmarshal(data, &ins)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		results, err := db.Query(fmt.Sprintf("SELECT `id` FROM maindata WHERE `id` = %v", ins.Id))
+		if err != nil {
+			panic(err.Error())
+		}
+		defer results.Close()
+		cntres := 0
+		for results.Next() {
+			err := results.Scan(&cntres)
+			if err != nil {
+				panic(err.Error())
+			}
+		}
+
+		if cntres > 0 {
+			w.Write([]byte("ID already exists!"))
+		} else {
+			if ins.Id == 0 {
+				insert, err := db.Query(fmt.Sprintf("INSERT INTO `maindata`(`name`, `lname`, `age`) VALUES ('%v', '%v', %v);", ins.Name, ins.Lname, ins.Age))
+				if err != nil {
+					panic(err.Error())
+				}
+				defer insert.Close()
+			} else {
+				insert, err := db.Query(fmt.Sprintf("INSERT INTO maindata VALUES (%v, '%v', '%v', %v);", ins.Id, ins.Name, ins.Lname, ins.Age))
+				if err != nil {
+					panic(err.Error())
+				}
+				defer insert.Close()
+			}
+			w.Write([]byte("Inserted successfully!"))
+		}
+
+	} else if req.Method == "DELETE" {
+
+		data, err := io.ReadAll(req.Body)
+		req.Body.Close()
+		if err != nil {
+			panic(err.Error())
+		}
+
+		ins, err := strconv.Atoi(string(data))
+		if err != nil {
+			panic(err.Error())
+		}
+
+		if ins == 0 {
+			w.Write([]byte("Invalid Id"))
+		} else {
+			remove, err := db.Query(fmt.Sprintf("DELETE FROM `maindata` WHERE `id` = %v;", ins))
+			if err != nil {
+				panic(err.Error())
+			}
+			defer remove.Close()
+			w.Write([]byte("Removed successfully!"))
 		}
 
 	} else {
