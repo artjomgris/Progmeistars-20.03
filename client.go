@@ -17,13 +17,17 @@ type Data struct {
 }
 
 func main() {
-	for i := 1; i <= 11; i++ {
-		fmt.Println(removeData(i))
+	data := Data{
+		Id:    1,
+		Name:  "Vasiliy",
+		Lname: "Pupkin",
+		Age:   40,
 	}
+	createData(data)
 
 }
 
-func getData() string {
+func getData() {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "http://127.0.0.1:5000", nil)
 	resp, err := client.Do(req)
@@ -33,10 +37,10 @@ func getData() string {
 
 	rec, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	return string(rec)
+	fmt.Println(string(rec))
 }
 
-func changeData(data Data) string {
+func changeData(data Data) {
 	client := &http.Client{}
 
 	var body bytes.Buffer
@@ -55,10 +59,10 @@ func changeData(data Data) string {
 
 	rec, err := io.ReadAll(resp.Body)
 	resp.Body.Close()
-	return string(rec)
+	fmt.Println(string(rec))
 }
 
-func createData(data Data) string {
+func createData(data Data) {
 	client := &http.Client{}
 
 	var body bytes.Buffer
@@ -77,10 +81,10 @@ func createData(data Data) string {
 
 	rec, err := io.ReadAll(resp.Body)
 	resp.Body.Close()
-	return string(rec)
+	fmt.Println(string(rec))
 }
 
-func removeData(id int) string {
+func removeData(id int) {
 	client := &http.Client{}
 
 	var body bytes.Buffer
@@ -93,5 +97,5 @@ func removeData(id int) string {
 	}
 	rec, err := io.ReadAll(resp.Body)
 	resp.Body.Close()
-	return string(rec)
+	fmt.Println(string(rec))
 }
