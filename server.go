@@ -38,17 +38,59 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			panic(err.Error())
 		}
-		io.WriteString(w, string(out))
 		w.Write(out)
+
 	} else if req.Method == "POST" {
 		data, err := io.ReadAll(req.Body)
 		req.Body.Close()
 		if err != nil {
 			panic(err.Error())
 		}
-
 		fmt.Printf("%s\n", data)
-		io.WriteString(w, "successful post") //In development
+
+		var upd Data
+		err = json.Unmarshal(data, &upd)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		if upd.Id == 0 {
+			w.Write([]byte("Invalid id"))
+		} else {
+			cnt := 0
+			qwery := "UPDATE `maindata` SET "
+			if upd.Name != "" {
+				qwery += fmt.Sprintf("`name` = '%v'", upd.Name)
+				cnt++
+			}
+			if upd.Age != 0 {
+				if cnt != 0 {
+					qwery += fmt.Sprintf(", `age` = %v", upd.Age)
+					cnt++
+				} else {
+					qwery += fmt.Sprintf("`age` = %v", upd.Age)
+				}
+
+			}
+			if upd.Lname != "" {
+				if cnt != 0 {
+					qwery += fmt.Sprintf(", `lname` = '%v'", upd.Lname)
+				} else {
+					qwery += fmt.Sprintf("`lname` = '%v'", upd.Lname)
+				}
+
+			}
+
+			qwery += fmt.Sprintf(" WHERE `id` = %v;", upd.Id)
+			fmt.Println(qwery)
+
+			update, err := db.Query(qwery)
+			if err != nil {
+				panic(err.Error())
+			}
+			defer update.Close()
+		}
+
 	} else {
 		w.WriteHeader(405)
 	}

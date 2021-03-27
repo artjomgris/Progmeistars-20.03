@@ -17,11 +17,11 @@ type Data struct {
 
 func main() {
 	fmt.Println(getData())
-	/*person := Data{
+	person := Data{
 		Id:  2,
 		Age: 32,
 	}
-	fmt.Println(changeData(person))*/
+	fmt.Println(changeData(person))
 
 }
 
