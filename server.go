@@ -20,6 +20,11 @@ type Data struct {
 }
 
 func Handler(w http.ResponseWriter, req *http.Request) {
+	header := w.Header()
+	header.Add("Access-Control-Allow-Origin", "*")
+	header.Add("Access-Control-Allow-Methods", "POST, OPTIONS, GET, DELETE, PUT")
+	header.Add("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+
 	if req.Method == "GET" {
 		results, err := db.Query("SELECT * FROM maindata")
 		if err != nil {
